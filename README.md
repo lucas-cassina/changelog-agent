@@ -19,6 +19,12 @@ GitLab API → fetch_mrs.py → JSON → Claude/Cursor/Codex → changelogs/YYYY
 3. Con los MRs restantes, el modelo juzga cuáles tienen impacto visible para el usuario y genera entradas de changelog en español, sin jerga técnica.
 4. El borrador se guarda en `changelogs/YYYY-WW.md` (por número de semana ISO) listo para editar y publicar.
 
+### Por qué un script Python y no una conexión MCP
+
+La alternativa obvia sería conectar el agente directamente a GitLab vía MCP. El problema es que cada llamada HTTP que hace el modelo consume tokens del contexto: headers, respuestas intermedias, paginación, manejo de errores. Con 50-100 MRs por semana y múltiples repos, eso se acumula rápido en tokens que no aportan nada al resultado.
+
+`fetch_mrs.py` resuelve esto fuera del contexto del modelo: hace todas las llamadas HTTP, pagina, filtra y devuelve un JSON limpio y compacto. El modelo recibe solo los datos que necesita para razonar — títulos, descripciones, branches — sin el ruido de la comunicación con la API.
+
 ## Requisitos
 
 - Python 3.8+
