@@ -1,12 +1,14 @@
 # changelog-agent
 
-Agente de IA que convierte los merge requests de GitLab en un borrador de changelog en lenguaje llano, pensado para usuarios del producto — no para desarrolladores.
+Agente de IA que convierte los merge requests de GitLab en un borrador de changelog en lenguaje llano, pensado para los equipos que operan, comunican y comercializan el producto — no para desarrolladores.
 
 ## El problema que resuelve
 
-Publicar changelogs para usuarios requiere criterio: no todo lo que se mergea les importa, y lo que sí les importa hay que contarlo diferente. Transformar commits técnicos en lenguaje accesible es un trabajo que nadie hace porque lleva tiempo y requiere contexto.
+El equipo de desarrollo habla en commits. El resto de la empresa, no.
 
-Este agente hace el trabajo pesado: busca los MRs mergeados en la última semana, descarta los que son refactors, fixes internos o cambios de infraestructura, y con los que quedan genera un borrador de changelog listo para revisar. El resultado no se publica directo — lo revisás, ajustás el tono donde hace falta, y lo mandás.
+Marketing necesita saber qué cambió para actualizar los materiales. Ventas necesita saber qué mejoró para tener conversaciones honestas con clientes. Operaciones necesita saber qué se arregló. Comunicación necesita saber qué vale la pena contar. Y lo que llega es `refactor(core): extraer lógica de MapperFactory a capa de servicios`.
+
+Este agente hace el trabajo de traducción: busca los MRs mergeados en la última semana, descarta los que son cambios internos irrelevantes para el resto del equipo, y con los que quedan genera un borrador de changelog en lenguaje que puede leer cualquier persona de la empresa. El resultado no se distribuye directo — lo revisás, ajustás el tono donde hace falta, y lo mandás.
 
 ## Cómo funciona
 
@@ -15,8 +17,8 @@ GitLab API → fetch_mrs.py → JSON → Claude/Cursor/Codex → changelogs/YYYY
 ```
 
 1. **`fetch_mrs.py`** consulta la API de GitLab y devuelve en JSON los MRs mergeados en el período indicado.
-2. El agente de IA pre-filtra por prefijo de título (`chore:`, `ci:`, `test:`, etc.) descartando lo que nunca es relevante para usuarios.
-3. Con los MRs restantes, el modelo juzga cuáles tienen impacto visible para el usuario y genera entradas de changelog en español, sin jerga técnica.
+2. El agente de IA pre-filtra por prefijo de título (`chore:`, `ci:`, `test:`, etc.) descartando lo que nunca es relevante fuera del equipo de desarrollo.
+3. Con los MRs restantes, el modelo juzga cuáles tienen impacto visible para el resto de la empresa y genera entradas en lenguaje llano, sin jerga técnica.
 4. El borrador se guarda en `changelogs/YYYY-WW.md` (por número de semana ISO) listo para editar y publicar.
 
 ### Por qué un script Python y no una conexión MCP
@@ -126,7 +128,7 @@ changelog-agent/
 - `Merge branch ...` — commits de merge automáticos
 - `` Revert "..." `` — reverts
 
-**Evaluado por el modelo** (incluido si tiene impacto para el usuario):
+**Evaluado por el modelo** (incluido si tiene impacto fuera del equipo de desarrollo):
 - `feat:` — nuevas funcionalidades
 - `fix:` — bugs corregidos
 - `hotfix:` — correcciones urgentes
@@ -145,12 +147,16 @@ El modelo juzga cada caso usando el título y la descripción del MR. Ante la du
 ## mi-frontend
 
 ### ✨ Novedades
-- **Acciones sugeridas en errores de emisión**: Cuando ocurre un error conocido
-  al emitir una póliza, el sistema ahora muestra pasos concretos para resolverlo.
+- **Sugerencias contextuales en el flujo de carga**: El sistema ahora muestra
+  opciones relevantes según el paso en el que se encuentra el usuario,
+  reduciendo la necesidad de buscar manualmente.
+
+### 🔧 Mejoras
+- La pantalla de configuración avanzada carga más rápido en conexiones lentas.
 
 ### 🐛 Bugs resueltos
-- Se corrigió la barra de descuento adicional que en ciertos casos no aplicaba correctamente.
-- El descuento extra ya no puede superar el límite permitido en coberturas fuera de pauta.
+- Se corrigió un problema en el panel de filtros que en ciertos casos
+  no guardaba la selección correctamente.
 
 ---
 *MRs analizados: 14 · Incluidos: 3 · Descartados: 11*
